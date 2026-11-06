@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jebel Saghro – Interactive Trek Map | Professional Edition</title>
+<style>
+:root{--bg:#f6f1e8;--panel:#fffdf8;--ink:#2b2a28;--mut:#7a746a;--line:#e2d9c8;--land:#efe3cc;--land2:#e6d4b2;--trek:#d9560b;--drive:#3b6ea5;--city:#2b2a28;--camp:#2f7d4f;--gite:#8a5a9e;--hotel:#b8860b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1a18;--panel:#25231f;--ink:#f0ebe0;--mut:#a39b8c;--line:#3a362f;--land:#2d2a24;--land2:#37322a;--trek:#ff8a3d;--drive:#6ea8e0;--city:#f0ebe0;--camp:#5fc085;--gite:#c493d8;--hotel:#e0b84a}}
+:root[data-theme="dark"]{--bg:#1b1a18;--panel:#25231f;--ink:#f0ebe0;--mut:#a39b8c;--line:#3a362f;--land:#2d2a24;--land2:#37322a;--trek:#ff8a3d;--drive:#6ea8e0;--city:#f0ebe0;--camp:#5fc085;--gite:#c493d8;--hotel:#e0b84a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+header{padding:16px 20px 6px}h1{margin:0;font-size:24px;letter-spacing:-.3px}header p{margin:4px 0 0;color:var(--mut);font:13px system-ui,sans-serif}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;padding:12px 20px 20px;max-width:1300px;margin:auto}
+@media(max-width:860px){.wrap{grid-template-columns:1fr;padding:10px}}
+.map{position:relative;background:var(--land);border:1px solid var(--line);border-radius:14px;overflow:hidden;touch-action:none}
+svg{display:block;width:100%;height:auto;cursor:grab}svg:active{cursor:grabbing}
+.ctl{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px}
+.ctl button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;cursor:pointer}
+.leg{position:absolute;left:10px;bottom:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:12px system-ui,sans-serif;display:grid;gap:4px}
+.leg i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-2px}
+.leg b{display:inline-block;width:20px;height:0;border-top:3px solid;margin-right:6px;vertical-align:3px}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;font-family:system-ui,sans-serif;max-height:760px;overflow:auto}
+.tabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.tabs button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card h2{font:700 17px Georgia,serif;margin:0 0 4px}.card .t{color:var(--mut);font-size:12px;margin-bottom:8px}
+.card p{font-size:13.5px;line-height:1.5;margin:0 0 10px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:13px;border-top:1px solid var(--line);padding-top:8px}.kv span:nth-child(odd){color:var(--mut)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;margin-right:4px}
+.hint{font-size:12px;color:var(--mut);margin-top:12px}
+.seg{fill:none;stroke-linecap:round;stroke-linejoin:round;transition:opacity .2s}
+.dim{opacity:.15}.pin{cursor:pointer}.pin text{font:700 11px system-ui,sans-serif;fill:#fff;text-anchor:middle;pointer-events:none}
+.lbl{font:12px Georgia,serif;fill:var(--ink);paint-order:stroke;stroke:var(--land);stroke-width:3px;pointer-events:none}
+.wp{font:10.5px system-ui,sans-serif;fill:var(--mut);paint-order:stroke;stroke:var(--land);stroke-width:3px;pointer-events:none}
+
+.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;max-width:1300px;margin:8px auto 0;padding:0 20px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-family:system-ui,sans-serif}
+.metric strong{display:block;font:700 18px Georgia,serif}.metric span{font-size:11.5px;color:var(--mut)}
+.actions{display:flex;gap:6px;margin-bottom:10px}.actions button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+.route-table{max-width:1300px;margin:0 auto;padding:0 20px 30px;font-family:system-ui,sans-serif}
+.route-table h2{font:700 18px Georgia,serif;margin:18px 0 8px}.route-table #table{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mut);font-weight:600}
+.note{font-size:12px;color:var(--mut);line-height:1.5}.source-list p{font-size:13px;line-height:1.55}.source-list a{color:var(--drive)}
+@media print{.ctl,.actions,.tabs{display:none}}
+</style>
+</head>
+<body>
+<header><h1>Jebel Saghro · Morocco’s Lost World</h1>
+<p>WORLD EXPEDITIONS · JSL · 9-DAY ITINERARY · CLIENT MAP · ROUTES ARE SCHEMATIC UNLESS OTHERWISE STATED</p></header>
+<section class="dashboard" id="dashboard"></section>
+<div class="wrap">
+<div class="map" id="map"><svg id="svg" viewBox="0 0 900 620" role="img" aria-label="Schematic interactive itinerary map"></svg>
+<div class="ctl"><button id="zi" aria-label="Zoom in">+</button><button id="zo" aria-label="Zoom out">−</button><button id="zr" aria-label="Reset map">⟳</button></div>
+<div class="leg"><span><b style="border-color:var(--trek)"></b>Walking trail (schematic)</span><span><b style="border-color:var(--drive);border-top-style:dashed"></b>Road transfer (schematic)</span><span><i style="background:var(--camp)"></i>Wild camp</span><span><i style="background:var(--hotel)"></i>Riad / kasbah / hotel</span><span><i style="background:var(--gite)"></i>Village guesthouse</span></div>
+</div>
+<aside class="side"><div class="actions"><button id="overview">Overview</button><button id="print">Print itinerary</button></div><div class="tabs" id="tabs"></div><div class="card" id="card"></div>
+<div class="hint">Planning figures only. Walking figures are provisional route estimates, not GPS-track measurements. Road figures are approximate routing references. Conditions, access and itinerary may change.</div></aside>
+</div>
+
+<script>
+const P={mar:[31.63,-7.99],tic:[31.30,-7.37],oua:[30.92,-6.91],agd:[30.69,-6.45],nko:[30.35,-6.10],han:[30.70,-5.97],ig3:[30.77,-5.93],tad:[30.85,-5.88],ban:[30.91,-5.84],igl:[31.00,-5.80],alm:[31.10,-5.78],tag:[31.22,-5.85],bou:[31.38,-5.99]};
+const X=ll=>20+(ll[1]+8.2)*0.857*372,Y=ll=>20+(31.8-ll[0])*372,pts=a=>a.map(k=>X(P[k]).toFixed(1)+','+Y(P[k]).toFixed(1)).join(' ');
+const segments=[
+{d:2,k:'drive',name:'Marrakech → Nkob',km:290,time:'5 h 15–6 h 15',route:'N9 over Tizi n’Tichka → Ouarzazate → Agdz → Nkob',p:['mar','tic','oua','agd','nko'],desc:'Approximate road routing. Intermediate stops depend on traffic and conditions.'},
+{d:3,k:'drive',name:'Nkob → Handour',km:40,time:'0 h 45–1 h 15',route:'Local road / access track toward Handour',p:['nko','han'],desc:'Approximate transfer; final access and exact trailhead should be confirmed locally.'},
+{d:3,k:'trek',name:'Handour → Ighazioun n Imlas',km:12,time:'4 h',route:'Trekking trail across dry valleys and volcanic plateau',p:['han','ig3'],desc:'12 km indicative estimate; original itinerary gives about 4 walking hours. Not verified by GPS.'},
+{d:4,k:'trek',name:'Ighazioun n Imlas → Bab n’Ali',km:16,time:'6 h',route:'Via Tadout n Toublah',p:['ig3','tad','ban'],desc:'16 km indicative estimate. Via-point geometry is schematic; not a GPS track.'},
+{d:5,k:'trek',name:'Bab n’Ali → Igli',km:15,time:'5–6 h',route:'Via Afourer gorges',p:['ban','igl'],desc:'15 km indicative estimate; gorge passage and local variants can alter the length.'},
+{d:6,k:'trek',name:'Igli → Almou n Oughioul',km:17,time:'6–7 h',route:'High plateaus around Kouaouch',p:['igl','alm'],desc:'17 km indicative estimate. Summit/plateau option depends on weather and group.'},
+{d:7,k:'trek',name:'Almou n Oughioul → Tagdilt',km:14,time:'5 h',route:'Descent to Tagdilt village',p:['alm','tag'],desc:'14 km indicative estimate; confirm actual descent route with local guide.'},
+{d:8,k:'drive',name:'Tagdilt → Marrakech',km:313.3,time:'5 h 58 min*',route:'Via Boumalne Dadès → Ouarzazate → Tizi n’Tichka → Marrakech',p:['tag','bou','oua','tic','mar'],desc:'Rome2Rio reference: 313.3 km / approx. 5 h 58 min for Tagdilt–Marrakech by road. Allow additional breaks and mountain-road variability.'}
+];
+const D=[
+{d:1,n:'Marrakech',s:'Arrival & briefing',p:'mar',ty:'hotel',acc:'Riad Berta or similar',m:'D',w:'—',drive:'—',km:'—',txt:'Arrive in Marrakech. Meet the local team, welcome briefing and equipment check before the trek.'},
+{d:2,n:'Nkob',s:'High Atlas crossing & Drâa Valley',p:'nko',ty:'hotel',acc:'Kasbah Baha Baha or similar',m:'B, L, D',w:'Optional late-afternoon walk',drive:'5 h 15–6 h 15',km:'~290 km road',txt:'Drive over the High Atlas and through the Drâa Valley to Nkob, an oasis known for its historic kasbahs. Walk in the palm grove and meet local families.'},
+{d:3,n:'Ighazioun n Imlas',s:'Trek start from Handour',p:'ig3',ty:'camp',acc:'Wild camping',m:'B, L, D',w:'4 h',drive:'45–75 min',km:'~40 km road + 12 km walk',txt:'Transfer from Nkob to Handour, then walk through dry valleys and volcanic plateaus to the first camp.'},
+{d:4,n:'Bab n’Ali',s:'Rock pinnacles via Tadout n Toublah',p:'ban',ty:'camp',acc:'Wild camping',m:'B, L, D',w:'6 h',drive:'—',km:'~16 km walk',txt:'Volcanic pinnacles and narrow canyons; pass toward Tadout n Toublah and approach the twin towers of Bab n’Ali.'},
+{d:5,n:'Igli',s:'Afourer gorges & hidden valleys',p:'igl',ty:'camp',acc:'Wild camping',m:'B, L, D',w:'5–6 h',drive:'—',km:'~15 km walk',txt:'Explore Afourer ravines and gorges, hidden water sources and areas used by the semi-nomadic Aït Atta. Camp beneath Tassegdalte Tamejgagte; optional walk toward Camel Head.'},
+{d:6,n:'Almou n Oughioul',s:'Kouaouch high plateaus',p:'alm',ty:'camp',acc:'Wild camping',m:'B, L, D',w:'6–7 h',drive:'—',km:'~17 km walk',txt:'Most demanding day: plateau or summit route depending on weather and group, views toward the High Atlas, then descend to a traditional pasture and final camp.'},
+{d:7,n:'Tagdilt',s:'Descent to the village',p:'tag',ty:'gite',acc:'Village guesthouse (local home)',m:'B, L, D',w:'5 h',drive:'—',km:'~14 km walk',txt:'Complete the five-day trek. Evening with the local team and overnight in a traditional village guesthouse.'},
+{d:8,n:'Marrakech',s:'Return via Boumalne Dadès & Ouarzazate',p:'mar',ty:'hotel',acc:'Riad Berta or similar',m:'B, L',w:'—',drive:'~5 h 58 min*',km:'~313 km road',txt:'Drive back via Boumalne Dadès, Ouarzazate and the High Atlas. Free evening in Marrakech.'},
+{d:9,n:'Departure from Marrakech',s:'Airport transfer included',p:'mar',ty:'hotel',acc:'—',m:'B',w:'—',drive:'—',km:'—',txt:'Transfer to Marrakech airport for departure, or continue independently.'}];
+const col={hotel:'var(--hotel)',camp:'var(--camp)',gite:'var(--gite)'},svg=document.getElementById('svg'),NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e};
+el('rect',{width:900,height:620,fill:'var(--land)'});
+el('path',{d:'M0 420 Q150 360 300 400 T620 300 T900 330 V620 H0Z',fill:'var(--land2)',opacity:.55});
+el('path',{d:'M330 90 Q520 40 700 120 T900 150 V0 H330Z',fill:'var(--land2)',opacity:.4});
+el('text',{x:60,y:60,class:'wp','font-style':'italic'}).textContent='High Atlas';
+el('text',{x:560,y:590,class:'wp','font-style':'italic'}).textContent='Jebel Saghro · Eastern Anti-Atlas';
+const paths=segments.map(s=>{let e=el('polyline',{points:pts(s.p),class:'seg segment','stroke-width':s.k=='trek'?4:2.7,stroke:s.k=='trek'?'var(--trek)':'var(--drive)','stroke-dasharray':s.k=='trek'?'':'7 6',tabindex:0,role:'button','aria-label':s.name});e.dataset.d=s.d;e.addEventListener('click',()=>showSegment(s));e.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();showSegment(s)}});return e});
+[['han','Handour'],['tad','Tadout n Toublah'],['bou','Boumalne Dadès'],['oua','Ouarzazate'],['agd','Agdz · Drâa Valley'],['tic','Tizi n’Tichka']].forEach(([k,n])=>{let x=X(P[k]),y=Y(P[k]);el('circle',{cx:x,cy:y,r:3.5,fill:'var(--mut)'});el('text',{x:x+7,y:y+3,class:'wp'}).textContent=n});
+const pins=[],grouped={};D.forEach(o=>(grouped[o.p]=grouped[o.p]||[]).push(o));
+D.forEach(o=>{const g=grouped[o.p],i=g.indexOf(o),off=g.length>1?(i-(g.length-1)/2)*26:0,x=X(P[o.p])+off,y=Y(P[o.p]);const G=el('g',{class:'pin',transform:`translate(${x},${y})`,tabindex:0,role:'button','aria-label':'Day '+o.d+' '+o.n});G.dataset.d=o.d;el('circle',{r:12,fill:col[o.ty],stroke:'var(--panel)','stroke-width':2.5},G);el('text',{y:4},G).textContent=o.d;G.addEventListener('click',()=>sel(o.d));G.addEventListener('keydown',e=>{if(e.key==='Enter')sel(o.d)});pins.push(G);if(i===0){let l=el('text',{x:x+16,y:y-14,class:'lbl'});l.textContent=o.n}});
+const tabs=document.getElementById('tabs'),card=document.getElementById('card'),btns=[['all','Overview'],...D.map(o=>[o.d,'Day '+o.d])].map(([v,l])=>{let b=document.createElement('button');b.textContent=l;b.onclick=()=>sel(v);tabs.appendChild(b);return[v,b]});
+function sel(v){btns.forEach(([k,b])=>b.classList.toggle('on',k==v));paths.forEach(s=>s.classList.toggle('dim',v!=='all'&&s.dataset.d!=v));pins.forEach(p=>p.style.opacity=(v==='all'||p.dataset.d===v)?1:.24);if(v==='all'){card.innerHTML='<h2>Itinerary overview</h2><div class="t">9 days · Marrakech to Jebel Saghro and back</div><p>Travel from the High Atlas and Drâa Valley into the volcanic landscapes of Jebel Saghro. Five trekking days feature dramatic pinnacles, gorges and Aït Atta territory.</p><div class="kv"><span>Grade</span><span>Introductory to moderate (itinerary source)</span><span>Meals</span><span>8 breakfasts · 7 lunches · 7 dinners</span><span>Luggage</span><span>Carried by mules during trek (source itinerary)</span><span>Accessibility</span><span>Not suitable for reduced mobility</span><span>Elevation data</span><span>Not verified; profile intentionally omitted</span></div>';return}let o=D[Number(v)-1];card.innerHTML=`<span class="badge" style="background:${col[o.ty]}">${{hotel:'Riad / kasbah / hotel',camp:'Wild camp',gite:'Guesthouse'}[o.ty]}</span><h2>Day ${o.d} · ${o.n}</h2><div class="t">${o.s}</div><p>${o.txt}</p><div class="kv"><span>Accommodation</span><span>${o.acc}</span><span>Meals</span><span>${o.m}</span><span>Walking</span><span>${o.w} · ${o.km}</span><span>Driving</span><span>${o.drive}</span></div>`}
+function showSegment(s){btns.forEach(([k,b])=>b.classList.toggle('on',k==s.d));paths.forEach(e=>e.classList.toggle('dim',e!==paths[segments.indexOf(s)]));card.innerHTML=`<span class="badge" style="background:${s.k==='trek'?'var(--trek)':'var(--drive)'}">${s.k==='trek'?'Trekking segment':'Road transfer'}</span><h2>${s.name}</h2><div class="t">${s.km} km · ${s.time}</div><p>${s.desc}</p><div class="kv"><span>Route</span><span>${s.route}</span><span>Metric status</span><span>Approximate planning estimate; not a GPS measurement</span></div>`}
+document.getElementById('overview').onclick=()=>sel('all');document.getElementById('print').onclick=()=>window.print();
+const walking=segments.filter(s=>s.k==='trek'),roads=segments.filter(s=>s.k==='drive'),walkTotal=walking.reduce((a,s)=>a+s.km,0),roadTotal=roads.reduce((a,s)=>a+s.km,0);
+document.getElementById('dashboard').innerHTML=[['~'+roadTotal.toFixed(1)+' km','Road transfers'],['~'+walkTotal+' km','Trekking total · estimate'],['~12 h 45 min*','Driving time · reference'],['26–28 h','Walking time · source hours'],['5','Trekking days'],['~17 km','Longest estimated day']].map(([v,l])=>`<div class="metric"><strong>${v}</strong><span>${l}</span></div>`).join('');
+sel('all');
+let vb={x:0,y:0,w:900,h:620},set=()=>svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+function zoom(f,cx=vb.x+vb.w/2,cy=vb.y+vb.h/2){let nw=Math.min(900,Math.max(180,vb.w*f)),r=nw/vb.w;vb={x:cx-(cx-vb.x)*r,y:cy-(cy-vb.y)*r,w:nw,h:vb.h*r};clamp();set()}
+function clamp(){vb.x=Math.max(0,Math.min(900-vb.w,vb.x));vb.y=Math.max(0,Math.min(620-vb.h,vb.y))}
+const pt=e=>{let r=svg.getBoundingClientRect();return[vb.x+(e.clientX-r.left)/r.width*vb.w,vb.y+(e.clientY-r.top)/r.height*vb.h]};
+svg.addEventListener('wheel',e=>{e.preventDefault();let[p,q]=pt(e);zoom(e.deltaY>0?1.15:.87,p,q)},{passive:false});
+let drag=null;svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y}});addEventListener('pointerup',()=>drag=null);addEventListener('pointermove',e=>{if(!drag)return;let r=svg.getBoundingClientRect();vb.x=drag.vx-(e.clientX-drag.x)/r.width*vb.w;vb.y=drag.vy-(e.clientY-drag.y)/r.height*vb.h;clamp();set()});
+document.getElementById('zi').onclick=()=>zoom(.75);document.getElementById('zo').onclick=()=>zoom(1.33);document.getElementById('zr').onclick=()=>{vb={x:0,y:0,w:900,h:620};set();sel('all')};
+</script></body></html>
